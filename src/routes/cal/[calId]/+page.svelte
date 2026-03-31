@@ -22,6 +22,8 @@
 		impegno: Impegno;
 	};
 
+	let showVacantOnly = $state(false);
+
 	let resources: Resource[] = $derived.by(() =>
 		pageData.aule.map((aula) => ({ id: aula.id, title: aula.descrizione }))
 	);
@@ -58,10 +60,6 @@
 	});
 
 	let currentTime = $state(new Date());
-
-	let sortedResources = $derived.by(() => {
-		return resources.toSorted((a, b) => a.title.localeCompare(b.title));
-	});
 
 	// Update current time every minute
 	onMount(() => {
@@ -155,12 +153,26 @@
 	<a class="btn btn-primary" href={resolve('/')} aria-label="Back to home page"> ← Back </a>
 	<h1 class="text-2xl font-bold">Availability for '{cal.name}' rooms</h1>
 </div>
+<div class="mb-4 flex items-center gap-4">
+	<input
+		type="checkbox"
+		id="showVacantOnly"
+		class="toggle"
+		bind:checked={showVacantOnly}
+		aria-label="Show only vacant rooms"
+	/>
+	<label for="showVacantOnly" class="text-sm">Show only vacant rooms</label>
+</div>
 
 {#await timelineEvents}
 	<div class="flex justify-center items-center h-32">
 		<div class="loading loading-spinner text-primary"></div>
 	</div>
 {:then events}
+	{@const filteredResources = resources.filter(
+		(r) => !showVacantOnly || !getCurrentActivity(events, r.id, currentTime)
+	)}
+	{@const sortedResources = filteredResources.sort((a, b) => a.title.localeCompare(b.title))}
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 		{#each sortedResources as resource (resource.id)}
 			{@render roomCard(events, resource)}
