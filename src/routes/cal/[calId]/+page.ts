@@ -19,17 +19,26 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 
 	const client = createUPClient(fetch);
 
-	const aule = client.getAule(params.calId);
+	const aulePromise = client.getAule(params.calId);
 
-	const impegni = client.getImpegni(params.calId, {
+	const impegniPromise = client.getImpegni(params.calId, {
 		dataInizio: startOfDay,
 		dataFine: endOfDay,
 		idAule: []
 	});
 
-	return {
-		aule: await aule,
-		impegni: impegni,
-		cal
-	};
+	const [aule, impegni] = await Promise.all([aulePromise, impegniPromise]);
+	if ('error' in aule) {
+		error(
+			aule.error.statusCode,
+			`Errore ${aule.error.codiceErrore} durante il recupero delle aule`
+		);
+	} else if ('error' in impegni) {
+		error(
+			impegni.error.statusCode,
+			`Errore ${impegni.error.codiceErrore} durante il recupero degli impegni`
+		);
+	}
+
+	return { aule: aule, impegni: impegni, cal };
 };

@@ -1,3 +1,5 @@
+export type ApiError = { error: { statusCode: number; codiceErrore: string } };
+
 export type Aula = {
 	capienza: number;
 	divisoreCapienza: number;

@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import type { Aula, Impegno } from './types';
+import type { ApiError, Aula, Impegno } from './types';
 
 export class UniversityPlannerClient {
 	private readonly baseUrl: string;
@@ -19,17 +19,14 @@ export class UniversityPlannerClient {
 	async getAule(
 		idCalendario: string,
 		options: { order?: string; limit?: number; auleIds?: string[] } = {}
-	): Promise<Aula[] | { error: { statusCode: number; codiceErrore: string } }> {
-		return this.post<Aula[] | { error: { statusCode: number; codiceErrore: string } }>(
-			'Aule/getAulePerCalendarioPubblico',
-			{
-				linkCalendarioId: idCalendario,
-				order: options.order ?? 'edificio.codice, descrizione',
-				auleIds: options.auleIds ?? [],
-				edificiIds: [],
-				limit: options.limit ?? 250
-			}
-		);
+	): Promise<Aula[] | ApiError> {
+		return this.post('Aule/getAulePerCalendarioPubblico', {
+			linkCalendarioId: idCalendario,
+			order: options.order ?? 'edificio.codice, descrizione',
+			auleIds: options.auleIds ?? [],
+			edificiIds: [],
+			limit: options.limit ?? 250
+		});
 	}
 
 	async getImpegni(
@@ -49,8 +46,8 @@ export class UniversityPlannerClient {
 			idAule: string[];
 			mostraIndisponibilitaTotali?: boolean;
 		}
-	): Promise<Impegno[]> {
-		return this.post<Impegno[]>('Impegni/getImpegniCalendarioPubblico', {
+	): Promise<Impegno[] | ApiError> {
+		return this.post('Impegni/getImpegniCalendarioPubblico', {
 			linkCalendarioId: idCal,
 			dataInizio,
 			dataFine,
