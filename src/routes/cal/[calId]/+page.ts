@@ -1,10 +1,10 @@
 import { error } from '@sveltejs/kit';
 import dayjs from 'dayjs';
 
-import { getAule, getImpegni } from '$lib/api';
 import { CAL_MAP } from '$lib/cals';
 
 import type { PageLoad } from './$types';
+import { createUPClient } from '$lib/api';
 
 export const load: PageLoad = async ({ fetch, params, url }) => {
 	const cal = CAL_MAP.find((c) => c.id === params.calId);
@@ -17,9 +17,11 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 	const startOfDay = dayjs(day).startOf('day');
 	const endOfDay = dayjs(day).endOf('day');
 
-	const aule = getAule(fetch, params.calId);
+	const client = createUPClient(fetch);
 
-	const impegni = getImpegni(fetch, params.calId, {
+	const aule = client.getAule(params.calId);
+
+	const impegni = client.getImpegni(params.calId, {
 		dataInizio: startOfDay,
 		dataFine: endOfDay,
 		idAule: []

@@ -5,7 +5,8 @@
 	import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 	import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 
-	import { getImpegni, type Impegno } from '$lib/api';
+	import { type Impegno } from '$lib/api/universityplanner';
+	import { createUPClient } from '$lib/api';
 
 	import type { PageData } from './$types';
 
@@ -58,9 +59,11 @@
 		events = []; // Clear current events
 		await tick(); // Wait for DOM update
 
+		const client = createUPClient(fetch);
+
 		lastInterval = { startDate, endDate }; // Save the interval
 
-		const unfilteredEvents = await getImpegni(fetch, page.params.calId!, {
+		const unfilteredEvents = await client.getImpegni(page.params.calId!, {
 			dataInizio: startDate,
 			dataFine: endDate,
 			idAule: [aula.id]
@@ -169,7 +172,6 @@
 			searchParams.set('impegno', id);
 		}
 
-		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		goto('?' + searchParams.toString(), { noScroll: true });
 	}
 </script>

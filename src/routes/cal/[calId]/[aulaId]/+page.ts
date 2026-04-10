@@ -1,11 +1,16 @@
-import { getAule } from '$lib/api';
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
+import { createUPClient } from '$lib/api';
 
 export const load: PageLoad = async ({ fetch, params }) => {
-	const aule = await getAule(fetch, params.calId, {
+	const client = createUPClient(fetch);
+	const aule = await client.getAule(params.calId, {
 		auleIds: [params.aulaId]
 	});
+
+	if ('error' in aule) {
+		error(aule.error.statusCode, `Errore nel recupero dell'aula: ${aule.error.codiceErrore}`);
+	}
 
 	const aula = aule.find((a) => a.id === params.aulaId);
 	if (aula == null) {

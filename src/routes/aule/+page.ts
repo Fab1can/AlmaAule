@@ -1,4 +1,4 @@
-import { getAule, type Aula } from '$lib/api';
+import { createUPClient, type Aula } from '$lib/api';
 import { CAL_MAP } from '$lib/cals';
 import type { PageLoad } from './$types';
 
@@ -15,12 +15,15 @@ function deduplicate(aule: CalendarAula[]) {
 export const load: PageLoad = async ({ fetch }) => {
 	const calendars = CAL_MAP;
 
+	const client = createUPClient(fetch);
+
 	const aulePromises = calendars.map(async (cal) => {
-		let aule: Aula[] = [];
-		try {
-			aule = await getAule(fetch, cal.id);
-		} catch (error) {
-			console.error(`Error fetching aule for calendar ${cal.id}:`, error);
+		const aule = await client.getAule(cal.id);
+		if ('error' in aule) {
+			console.warn(
+				`Failed to fetch aule for calendar ${cal.id}: ${aule.error.codiceErrore} (status ${aule.error.statusCode})`
+			);
+			return [];
 		}
 
 		// Add calId and pre-computed searchKey to each aula
@@ -38,7 +41,7 @@ export const load: PageLoad = async ({ fetch }) => {
 		.then((it) => it.flat())
 		.then((it) => deduplicate(it))
 		.then((it) =>
-			// Pre-sort the array using the searchKey to avoid O(n log n) sorting during render cycles
+			// Pre-sort the array using the searchKey
 			it.sort((a, b) => a.searchKey.localeCompare(b.searchKey))
 		);
 

@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import type { Aula } from '$lib/api';
 	import type { PageData } from './$types';
 
 	import MdiBuilding from '@iconify-svelte/mdi/building';

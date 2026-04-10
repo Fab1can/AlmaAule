@@ -27,7 +27,13 @@
 	let showVacantOnly = $state(false);
 
 	let resources: Resource[] = $derived.by(() => {
-		const mapped = pageData.aule.map((aula) => ({ id: aula.id, title: aula.descrizione }));
+		const aule = pageData.aule;
+		if ('error' in aule) {
+			console.error('Could not get aule', aule.error);
+			return [];
+		}
+
+		const mapped = aule.map((aula) => ({ id: aula.id, title: aula.descrizione }));
 		return mapped.sort((a, b) => a.title.localeCompare(b.title));
 	});
 
