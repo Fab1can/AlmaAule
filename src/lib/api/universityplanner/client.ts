@@ -74,9 +74,6 @@ export class UniversityPlannerClient {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ ...body, clienteId: this.clientId })
 		});
-		if (!res.ok) {
-			throw new Error(`Error fetching ${endpoint}: ${res.status} ${res.statusText}`);
-		}
 		return await res.json();
 	}
 
