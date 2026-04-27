@@ -6,6 +6,8 @@
 	import type { Impegno } from '$lib/api';
 
 	import { onMount } from 'svelte';
+	import { SvelteURL } from 'svelte/reactivity';
+	import { replaceState } from '$app/navigation';
 
 	let { data: pageData } = $props();
 	let { cal, impegni: impegniPromise } = $derived(pageData);
@@ -24,7 +26,7 @@
 		impegno: Impegno;
 	};
 
-	let showVacantOnly = $state(false);
+	let showVacantOnly = $state(window.location.hash === '#vacant');
 
 	let resources: Resource[] = $derived.by(() => {
 		const aule = pageData.aule;
@@ -110,6 +112,18 @@
 		// Since events are pre-sorted chronologically, the first event in the future is the next activity
 		return events.find((e) => e.startTime > time);
 	};
+
+	const changedVacantOnly = (event: Event) => {
+		//set the url anchor to the current value of the checkbox, so that it can be shared
+		const target = event.target as HTMLInputElement;
+		const url = new SvelteURL(window.location.href);
+		if (target.checked) {
+			url.hash = 'vacant';
+		} else {
+			url.hash = '';
+		}
+		replaceState(url, {});
+	};
 </script>
 
 {#snippet roomCard(eventsMap: Map<string, TimelineEvent[]>, resource: Resource)}
@@ -174,6 +188,7 @@
 		id="showVacantOnly"
 		class="toggle"
 		bind:checked={showVacantOnly}
+		onchange={changedVacantOnly}
 		aria-label="Show only vacant rooms"
 	/>
 	<label for="showVacantOnly" class="text-sm">Show only vacant rooms</label>
